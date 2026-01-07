@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { DropZone } from './components/DropZone';
-import { EditorPanel } from './components/EditorPanel';
+import { DropZone } from './Components/DropZone';
+import { EditorPanel } from './Components/EditorPanel';
 import { ImageState } from './types';
 
 function App() {

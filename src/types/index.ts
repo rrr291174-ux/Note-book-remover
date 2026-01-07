@@ -1,6 +1,7 @@
 export interface ImageState {
   images: ImageItem[];
-  isEditorVisible: boolean;
+  currentImageId?: string | null;
+  isEditorVisible?: boolean;
 }
 
 export interface ImageItem {
