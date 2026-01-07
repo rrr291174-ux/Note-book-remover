@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TET DSC Tech Squad - Watermark Remover Pro</title>
+    <meta name="description" content="Professional watermark remover with PDF generation and Telegram integration">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'telegram': '#0088cc',
+                        'tet-blue': '#1e40af',
+                        'tet-yellow': '#fbbf24',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); }
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        /* Gradient backgrounds */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="shield" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold gradient-text">TET DSC Tech Squad</h1>
+                        <p class="text-sm text-gray-600">Watermark Remover Pro</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="https://t.me/tgdsc2025" target="_blank" class="bg-telegram hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        <span>Join Telegram</span>
+                    </a>
+                    <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <i data-lucide="moon" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Upload Section -->
+        <section id="uploadSection" class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl p-8 card-hover">
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 float-animation">
+                        <i data-lucide="upload-cloud" class="w-10 h-10 text-white"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Upload Your Images</h2>
+                    <p class="text-gray-600">Drop images here or click to browse. Multiple images supported.</p>
+                </div>
+                
+                <!-- Drop Zone -->
+                <div id="dropZone" class="border-3 border-dashed border-gray-300 rounded-xl p-12 text-center transition-all hover:border-blue-500 hover:bg-blue-50 cursor-pointer">
+                    <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+                    <div class="flex flex-col items-center space-y-4">
+                        <i data-lucide="image" class="w-16 h-16 text-gray-400"></i>
+                        <div>
+                            <p class="text-lg font-medium text-gray-700">Drop images here or click to browse</p>
+                            <p class="text-sm text-gray-500 mt-1">Support for JPG, PNG, GIF, WebP (Max 10MB each)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Features -->
+                <div class="grid md:grid-cols-3 gap-4 mt-8">
+                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                        <i data-lucide="zap" class="w-8 h-8 text-blue-600 mx-auto mb-2"></i>
+                        <h3 class="font-semibold text-gray-800">Fast Processing</h3>
+                        <p class="text-sm text-gray-600">Instant watermark removal</p>
+                    </div>
+                    <div class="text-center p-4 bg-purple-50 rounded-lg">
+                        <i data-lucide="file-text" class="w-8 h-8 text-purple-600 mx-auto mb-2"></i>
+                        <h3 class="font-semibold text-gray-800">PDF Export</h3>
+                        <p class="text-sm text-gray-600">Professional PDF generation</p>
+                    </div>
+                    <div class="text-center p-4 bg-green-50 rounded-lg">
+                        <i data-lucide="users" class="w-8 h-8 text-green-600 mx-auto mb-2"></i>
+                        <h3 class="font-semibold text-gray-800">Team Ready</h3>
+                        <p class="text-sm text-gray-600">Batch processing support</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Editor Section -->
+        <section id="editorSection" class="hidden max-w-6xl mx-auto">
+            <!-- Navigation -->
+            <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
+                <div class="flex items-center justify-between">
+                    <button onclick="resetAll()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                        <span>Back to Upload</span>
+                    </button>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-600">
+                            Image <span id="currentImageIndex">1</span> of <span id="totalImages">1</span>
+                        </span>
+                        <div class="flex space-x-2">
+                            <button onclick="previousImage()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                            </button>
+                            <button onclick="nextImage()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Canvas Preview -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i data-lucide="eye" class="w-5 h-5 mr-2"></i>
+                            Preview
+                        </h3>
+                        <div class="relative bg-gray-50 rounded-lg p-4 overflow-auto max-h-96">
+                            <canvas id="canvas" class="max-w-full h-auto mx-auto shadow-lg rounded"></canvas>
+                            
+                            <!-- Clickable overlays -->
+                            <div id="watermarkOverlay" class="absolute hidden cursor-pointer hover:opacity-80 transition-opacity" onclick="openTelegram()">
+                                <div class="bg-yellow-400 text-black px-2 py-1 rounded text-xs font-semibold">
+                                    Click to join our group!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="space-y-6">
+                    <!-- Logo Upload -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i data-lucide="image" class="w-5 h-5 mr-2"></i>
+                            Logo Watermark
+                        </h3>
+                        <div id="logoUploadArea" class="space-y-4">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
+                                <input type="file" id="logoInput" accept="image/*" class="hidden">
+                                <i data-lucide="upload" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                                <p class="text-sm text-gray-600">Upload logo</p>
+                            </div>
+                            <div id="logoPreview" class="hidden">
+                                <img id="logoImage" class="w-16 h-16 mx-auto rounded-lg shadow">
+                                <button onclick="removeLogo()" class="mt-2 text-red-600 text-sm hover:text-red-700">
+                                    Remove logo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Watermark Settings -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i data-lucide="settings" class="w-5 h-5 mr-2"></i>
+                            Watermark Settings
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Text</label>
+                                <input type="text" id="watermarkText" value="TGDSCGROUP" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Background Color</label>
+                                <div class="flex space-x-2">
+                                    <input type="color" id="bgColor" value="#FFD400" class="w-12 h-10 border rounded cursor-pointer">
+                                    <input type="text" id="bgColorText" value="#FFD400" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Text Color</label>
+                                <div class="flex space-x-2">
+                                    <input type="color" id="textColor" value="#000000" class="w-12 h-10 border rounded cursor-pointer">
+                                    <input type="text" id="textColorText" value="#000000" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Size: <span id="sizeValue">22</span>%</label>
+                                <input type="range" id="watermarkSize" min="10" max="50" value="22" class="w-full">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Position X: <span id="offsetXValue">20</span>px</label>
+                                <input type="range" id="offsetX" min="0" max="100" value="20" class="w-full">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Position Y: <span id="offsetYValue">20</span>px</label>
+                                <input type="range" id="offsetY" min="0" max="100" value="20" class="w-full">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PDF Settings -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i data-lucide="file-text" class="w-5 h-5 mr-2"></i>
+                            PDF Settings
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm font-medium text-gray-700">Top Banner</label>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="showBanner" checked class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm font-medium text-gray-700">Join Button</label>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="showButton" checked class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Images per page</label>
+                                <select id="imagesPerPage" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="1">1 image</option>
+                                    <option value="2" selected>2 images</option>
+                                    <option value="3">3 images</option>
+                                    <option value="4">4 images</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="space-y-3">
+                        <button onclick="downloadAll()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                            <i data-lucide="download" class="w-5 h-5"></i>
+                            <span>Download All Images</span>
+                        </button>
+                        <button onclick="downloadPDF()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                            <span>Download PDF</span>
+                        </button>
+                        <button onclick="resetAll()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                            <span>Start Over</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 flex flex-col items-center space-y-4">
+                <div class="spinner"></div>
+                <p class="text-lg font-semibold">Processing...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="shield" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold">TET DSC Tech Squad</h3>
+                        <p class="text-sm text-gray-400">Professional Watermark Solutions</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="https://t.me/tgdsc2025" target="_blank" class="flex items-center space-x-2 hover:text-blue-400 transition-colors">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                        <span>Join Telegram</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-2 hover:text-blue-400 transition-colors">
+                        <i data-lucide="github" class="w-5 h-5"></i>
+                        <span>GitHub</span>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-6 pt-6 text-center text-sm text-gray-400">
+                <p>&copy; 2024 TET DSC Tech Squad. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>
